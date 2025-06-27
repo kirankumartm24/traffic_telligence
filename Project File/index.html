@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Traffic Volume Estimation</title>
+  <style>
+    body {
+      background-image: url('https://wallpaperaccess.com/full/3994459.jpg');
+      background-size: cover;
+      background-position: center;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      color: #111;
+    }
+    .container {
+      background: rgba(255,255,255,0.9);
+      padding: 30px 40px;
+      margin: 60px auto;
+      border-radius: 12px;
+      width: 360px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    }
+    h1 {
+      text-align: center;
+      font-size: 2em;
+      font-weight: bold;
+      margin-top: 30px;
+      color: #333;
+    }
+    label {
+      font-weight: bold;
+      display: block;
+      margin-top: 10px;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      margin-bottom: 12px;
+      border-radius: 4px;
+      border: 1px solid #aaa;
+      font-size: 1em;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background: #2c3e50;
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background: #1a252f;
+    }
+    #result {
+      margin-top: 18px;
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #28a745;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Traffic Volume Estimation</h1>
+  <div class="container">
+    <form id="predictForm">
+      <label for="hour">Hour (0–23):</label>
+      <input type="number" id="hour" min="0" max="23" required>
+
+      <label for="weather">Weather:</label>
+      <select id="weather" required>
+        <option value="Clear">Clear</option>
+        <option value="Clouds">Clouds</option>
+        <option value="Rain">Rain</option>
+        <option value="Snow">Snow</option>
+        <option value="Mist">Mist</option>
+        <option value="Fog">Fog</option>
+        <option value="Drizzle">Drizzle</option>
+        <option value="Thunderstorm">Thunderstorm</option>
+      </select>
+
+      <label for="temp">Temperature (K):</label>
+      <input type="number" id="temp" step="0.1" required>
+
+      <label for="day">Day of Week (0 = Monday):</label>
+      <input type="number" id="day" min="0" max="6" required>
+
+      <label for="month">Month (1–12):</label>
+      <input type="number" id="month" min="1" max="12" required>
+
+      <button type="submit">Predict</button>
+    </form>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    document.getElementById("predictForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const data = {
+        hour: +document.getElementById("hour").value,
+        weather: document.getElementById("weather").value,
+        temp: +document.getElementById("temp").value,
+        day: +document.getElementById("day").value,
+        month: +document.getElementById("month").value
+      };
+
+      const resultDiv = document.getElementById("result");
+      resultDiv.textContent = "Predicting...";
+
+      try {
+        const response = await fetch("http://127.0.0.1:5000/predict", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          resultDiv.textContent = `Predicted Volume: ${result.predicted_volume}`;
+        } else {
+          resultDiv.textContent = `Error: ${result.error || "Unknown error"}`;
+        }
+      } catch (err) {
+        resultDiv.textContent = "Error: Could not connect to server.";
+      }
+    });
+  </script>
+</body>
+</html>
